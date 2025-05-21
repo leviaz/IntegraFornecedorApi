@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_121"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="/rep-bibliotecasJava/snk/jape.jar"/>
+	<classpathentry kind="lib" path="/rep-bibliotecasJava/snk/mge-modelcore.jar"/>
+	<classpathentry kind="lib" path="/rep-bibliotecasJava/snk/SankhyaW-extensions.jar"/>
+	<classpathentry kind="lib" path="/rep-bibliotecasJava/web/okhttp-3.9.0.jar"/>
+	<classpathentry kind="lib" path="/rep-bibliotecasJava/web/okio-1.13.0.jar"/>
+	<classpathentry kind="lib" path="/rep-bibliotecasJava/json/org.json.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
