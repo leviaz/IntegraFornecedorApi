@@ -6,6 +6,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -69,6 +71,8 @@ public class Services {
 				BigDecimal codprod = itens.asBigDecimal("CODPROD");
 				DynamicVO produtosPRO = JapeFactory.dao(DynamicEntityNames.PRODUTO).findByPK(codprod);
 
+				if(produtosPRO.asBigDecimalOrZero("AD_IDPROD").intValue() > 0) {
+					
 				if (count > 0) {
 					itemsJson.append(",\r\n"); // separador de itens
 				}
@@ -77,11 +81,15 @@ public class Services {
 						.append("\",\r\n").append("      \"qty\": ").append(itens.asBigDecimal("QTDNEG")).append("\r\n")
 						.append("    }");
 
-				count++;
+				count++;}
 			}
 			itemsJson.append("\r\n  ],\r\n");
+			
+			if(count > 0) {
+				
+			
 
-			 bodyRq = "{\"customerTaxvat\":\""+parc.asString("CGC_CPF")+"\",\"commercialTable\":445,"+itemsJson+"\"address\":{\"customer_address_id\":"+idAdr+"},\"paymentMethod\":{\"method\":\""+metPag+"\",\"additional_data\":[\"{\\\"code\\\": \\\""+tipvenda+"\\\"}\"]},\"acceptanceData\":{\"accepted_distributor_code\":\""+emp.asString("CGC")+"\"},\"invoiceData\":{\"distributor_invoice_number\":\""+cab.asBigDecimalOrZero("NUMNOTA").toString()+"\",\"distributor_cnpj\":\""+emp.asString("CGC")+"\",\"distributor_invoice_access_key\":\""+cab.asString("CHAVENFE")+"\",\"distributor_invoice_series_code\":\""+cab.asBigDecimal("NUMNOTA").toString()+"\",\"invoice_processed_at\":\""+invProcessDt+"\"},\"coupons\":[]}";
+			bodyRq = "{\"customerTaxvat\":\""+parc.asString("CGC_CPF")+"\",\"commercialTable\":445,"+itemsJson+"\"address\":{\"customer_address_id\":"+idAdr+"},\"paymentMethod\":{\"method\":\""+metPag+"\",\"additional_data\":[\"{\\\"code\\\": \\\""+tipvenda+"\\\"}\"]},\"acceptanceData\":{\"accepted_distributor_code\":\""+emp.asString("CGC")+"\"},\"invoiceData\":{\"distributor_invoice_number\":\""+cab.asBigDecimalOrZero("NUMNOTA").toString()+"\",\"distributor_cnpj\":\""+emp.asString("CGC")+"\",\"distributor_invoice_access_key\":\""+cab.asString("CHAVENFE")+"\",\"distributor_invoice_series_code\":\""+cab.asBigDecimal("NUMNOTA").toString()+"\",\"invoice_processed_at\":\""+invProcessDt+"\"},\"coupons\":[]}";
 			RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), bodyRq);
 			
 			Request request = new Request.Builder().url(url+"/V1/orders/create-complete").put(body).addHeader("Authorization", token)
@@ -94,17 +102,23 @@ public class Services {
 				idpdd = Integer.parseInt(respostaJson);
 				if (idpdd == 0) {
 					System.out.println("Erro: " + response.code());
-					//mudar para tsiavi
+					//LANÇAR NA TELA DE LOG
 					throw new Exception(""+response.code() + response);
 				}
+			
 
 			} else {
 				System.out.println("Request invalida com status: " + response.code() + response.body());
 				JSONObject root = new JSONObject(response.body().string());
-				//mudar para tsiavi
+				//LANÇAR NA TELA DE LOG
 				throw new Error(root.getString("message"));
 			}
 			response.close();
+			
+			}
+			else {
+				//LANÇAR A TELA DE LOG
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new Exception(e);
@@ -112,8 +126,9 @@ public class Services {
 		return idpdd;
 	}
 
+
 	//requisição de devolução passando o id da nota
-	public int Devolveped(String token, int order_id, String comment) throws Exception {
+	public int Devolveped(String token, int order_id, String comment, BigDecimal nunota) throws Exception {
 		Integer iddev = 0;
 		try {
 			Response response = null;
@@ -121,9 +136,28 @@ public class Services {
 					+ "";
 
 			OkHttpClient client = new OkHttpClient();
+			StringBuilder itemsJson = new StringBuilder();
+			Collection<DynamicVO> ProdutosIte = JapeFactory.dao(DynamicEntityNames.ITEM_NOTA).find("NUNOTA =" + nunota);
+			
+			int count = 0;
+			for (DynamicVO itens : ProdutosIte) {
+				BigDecimal itemID = itens.asBigDecimal("AD_IDITEM");
+				if (count > 0) {
+					itemsJson.append(",\r\n"); // separador de itens
+				}
+				itemsJson.append("    {\r\n").append("      \"order_item_id\": \"").append(itemID.intValue())
+				.append("\",\r\n").append("      \"qty\": ").append(itens.asBigDecimalOrZero("QTDNEG").intValue()).append("\r\n")
+				.append("    }");
+				
+			}
+					
+			String bodyRq = "{\n" +
+				    "  \"items\": ["+itemsJson+"],\n" +
+				    "  \"comment\": {\n" +
+				    "    \"comment\": \"" + comment + "\"\n" +
+				    "  }\n" +
+				    "}";
 
-			String bodyRq = " {\r\n" + " \"items\": [\r\n" + " ],\r\n" + " \"comment\": {\r\n" + " \"comment\": \""
-					+ comment + "\"\r\n" + " }\r\n" + " }";
 			RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), bodyRq);
 			Request request = new Request.Builder().url(url).post(body).addHeader("Authorization", token)
 					.addHeader("Content-Type", "application/json").build();
@@ -137,7 +171,7 @@ public class Services {
 			} else {
 				System.out.println("Request invalida com status: " + response.code());
 				JSONObject root = new JSONObject(response.body().string());
-				//mudar para tsiavi
+				//LANÇAR NA TELA DE LOG
 				throw new Error(root.getString("message"));
 
 			}
@@ -191,7 +225,7 @@ public class Services {
 
 			} else {
 				System.out.println("Request busca cliente CNPJ/CPF invalida com status: " + response.code());
-				//mudar para tsiavi
+				//LANÇAR NA TELA DE LOG
 				throw new Exception();
 
 			}
@@ -203,6 +237,52 @@ public class Services {
 			throw new Exception(e + "Root=" + root.toString());
 		}
 		return id;
+	}
+	
+	public Map<Integer,String> ConsultaItens(String token, Integer orderId) throws Exception {
+		Map<Integer,String> itens = new HashMap<>();
+		JSONObject root = null;
+		try {
+			String url = util.consultaParam("KPT_URLAPIVEEVO");
+
+			OkHttpClient client = new OkHttpClient();
+
+			Request request = new Request.Builder().url(url
+					+ "/rest/V1/orders/items?searchCriteria[filterGroups][0][filters][0][field]=order_id&searchCriteria[filterGroups][0][filters][0][value]="
+					+ orderId).get().addHeader("Authorization", token).addHeader("Content-Type", "application/json")
+					.build();
+
+			Call call = client.newCall(request);
+			// Execução da request
+			Response response = call.execute();
+
+			if (response.isSuccessful() && null != response.body()) {
+				root = new JSONObject(response.body().string());
+
+				JSONArray items = root.getJSONArray("items");
+
+				for (int i = 0; i <= items.length(); i++) {
+					JSONObject item = items.getJSONObject(i);
+					int itemId = item.getInt("item_id");
+					String sku = item.getString("sku");
+					
+					itens.put(itemId, sku);
+				}
+
+			} else {
+				System.out.println("Request busca cliente CNPJ/CPF invalida com status: " + response.code());
+				// LANÇAR NA TELA DE LOG
+				throw new Exception();
+
+			}
+
+			response.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception(e + "Root=" + root.toString());
+		}
+		return itens;
 	}
 
 }

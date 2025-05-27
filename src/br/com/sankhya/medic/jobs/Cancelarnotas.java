@@ -26,6 +26,7 @@ public class Cancelarnotas implements ScheduledAction {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 	}
 
 	private void consultaPdd() throws Exception {
@@ -49,12 +50,13 @@ public class Cancelarnotas implements ScheduledAction {
 		for (DynamicVO nunota : nunotas) {
 			BigDecimal nuNota = nunota.asBigDecimalOrZero("NUNOTA");
 			Integer idnota = nunota.asBigDecimalOrZero("AD_IDNOTA").intValue();
-			int idDevNota = services.Devolveped(token, idnota, "Comment");
+			int idDevNota = services.Devolveped(token, idnota, "Comment",nuNota);
 			if (idDevNota > 0) {
-				update.attPK(DynamicEntityNames.CABECALHO_NOTA, "NUNOTA", nuNota, "AD_IDNOTADEV", idDevNota);
+				update.attPK(DynamicEntityNames.CABECALHO_NOTA, nuNota, "AD_IDNOTADEV", idDevNota);
 			}
 			else {
-				update.attPK(DynamicEntityNames.CABECALHO_NOTA, "NUNOTA", nunota.asBigDecimal("NUNOTA"), "OBSERVACAO", "erro ao enviar cancelamento de nota");
+				//LANÇAR NA TELA DE LOG
+//				update.attPK(DynamicEntityNames.CABECALHO_NOTA, nunota.asBigDecimal("NUNOTA"), "OBSERVACAO", "erro ao enviar cancelamento de nota");
 
 			}
 		}
