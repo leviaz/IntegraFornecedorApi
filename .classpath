@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="/rep-bibliotecasJava/web/okhttp-3.9.0.jar"/>
 	<classpathentry kind="lib" path="/rep-bibliotecasJava/web/okio-1.13.0.jar"/>
 	<classpathentry kind="lib" path="/rep-bibliotecasJava/json/org.json.jar"/>
+	<classpathentry kind="lib" path="/rep-bibliotecasJava/snk/sanutil.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
