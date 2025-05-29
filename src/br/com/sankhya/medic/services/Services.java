@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import br.com.sankhya.jape.vo.DynamicVO;
 import br.com.sankhya.jape.wrapper.JapeFactory;
+import br.com.sankhya.medic.metodospadrao.Updates;
 import br.com.sankhya.medic.metodospadrao.Utilitarios;
 import br.com.sankhya.modelcore.util.DynamicEntityNames;
 import okhttp3.Call;
@@ -27,6 +28,7 @@ import okhttp3.Response;
 
 public class Services {
 	Utilitarios util = new Utilitarios();
+	Updates upd = new Updates();
 
 	// criando pedido
 	public int Addped(String token, BigDecimal codparc, BigDecimal nunota) throws Exception {
@@ -47,14 +49,16 @@ public class Services {
 			String tipvenda = util.consultaTipVenda(cab.asBigDecimalOrZero("CODTIPVENDA"));
 			if ("0".equals(tipvenda)) {
 				// mudar para tsiavi
-				throw new Exception("Método de pagamento não cadastrado");
+				//throw new Exception("Método de pagamento não cadastrado");
+				upd.log(nunota, "Nota não pode ser enviada, pois o método de pagamento não foi cadastrado");
 			}
 			String metPag = util.consultaMetPag(cab.asBigDecimalOrZero("CODTIPVENDA"));
 			int idAdr = buscaCliente(token, codparc);
 
 			if (idAdr == 0) {
 				// mudar para tsiavi
-				throw new Exception("Cliente não possui cadastro completo na API VEEVO");
+				//throw new Exception("Cliente não possui cadastro completo na API VEEVO");
+				upd.log(nunota, "Nota não pode ser enviada, pois o cliente não está cadastrado");
 			}
 
 			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
@@ -114,14 +118,16 @@ public class Services {
 					if (idpdd == 0) {
 						System.out.println("Erro: " + response.code());
 						// LANÇAR NA TELA DE LOG
-						throw new Exception("" + response.code() + response);
+						upd.log(nunota, "Nota não gerou id de criação");
+						//throw new Exception("" + response.code() + response);
 					}
 
 				} else {
 					System.out.println("Request invalida com status: " + response.code() + response.body());
 					JSONObject root = new JSONObject(response.body().string());
 					// LANÇAR NA TELA DE LOG
-					throw new Error(root.getString("message"));
+					upd.log(nunota, "Nota apresentou status inválido na criação");
+					//throw new Error(root.getString("message"));
 				}
 				response.close();
 
@@ -195,7 +201,8 @@ public class Services {
 				System.out.println("Request invalida com status: " + response.code());
 				JSONObject root = new JSONObject(response.body().string());
 				// LANÇAR NA TELA DE LOG
-				throw new Error(root.getString("message"));
+				upd.log(nunotadev, "Nota apresentou status inválido na devolução");
+				//throw new Error(root.getString("message"));
 
 			}
 
@@ -295,7 +302,7 @@ public class Services {
 				System.out.println("Request busca cliente CNPJ/CPF invalida com status: " + response.code());
 				// LANÇAR NA TELA DE LOG
 				throw new Exception();
-
+				//upd.log(nunota, "Nota não pode ser enviada, pois o cliente não está cadastrado");
 			}
 
 			response.close();
