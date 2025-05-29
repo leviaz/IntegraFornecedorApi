@@ -59,17 +59,17 @@ public class Cancelarnotas implements ScheduledAction {
 		        		+ "WHERE CAB1.CODTIPOPER IN (" + top + ")\r\n"
 		        		+ "AND CAB1.AD_IDNOTADEV IS NULL\r\n"
 		        		+ "AND CAB2.AD_IDNOTA IS NOT NULL\r\n"
-		        		+ "AND CAB1.NUNOTA <> CAB2.NUNOTA AND CAB2.NUNOTA != 208433 AND CAB2.NUNOTA != 208435 AND CAB2.NUNOTA != 208437");
+		        		+ "AND CAB1.NUNOTA <> CAB2.NUNOTA AND CAB2.DTNEG=TRUNC(SYSDATE)  AND CAB1.NUNOTA !=208446");
 		        sql.appendSql(sqlStr);
 		        rset = sql.executeQuery();
 		    	while (rset.next()) {
 		    		BigDecimal nunotadev = rset.getBigDecimal("NOTA_DEVOLVIDA");
 		    		BigDecimal nunotaorig = rset.getBigDecimal("NOTA_ORIGEM");
 					Integer idnota = rset.getBigDecimal("AD_IDNOTA").intValue();
-					int idDevNota = services.Devolveped(token, idnota, "Comment",nunotadev,nunotaorig);
+					Integer idDevNota = services.Devolveped(token, idnota, "Comment",nunotadev,nunotaorig);
 					if (idDevNota > 0) {
 						update.attPK("TGFCAB","NUNOTA", nunotadev, "AD_IDNOTADEV", idDevNota);
-						update.log(nunotadev, "Nota de devolução feito com sucesso:"+ String.valueOf(idDevNota));
+						update.log(nunotadev, "Nota de devolução feito com sucesso:"+ idDevNota.toString());
 					}
 					else {
 						//LANÇAR NA TELA DE LOG

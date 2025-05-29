@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import com.sankhya.util.TimeUtils;
 
 import br.com.sankhya.jape.EntityFacade;
+import br.com.sankhya.jape.core.JapeSession;
+import br.com.sankhya.jape.core.JapeSession.SessionHandle;
 import br.com.sankhya.jape.dao.JdbcWrapper;
 import br.com.sankhya.jape.sql.NativeSql;
 import br.com.sankhya.jape.wrapper.JapeFactory;
@@ -59,6 +61,7 @@ public class Updates {
 	}
 	
 	public void log(BigDecimal nunota, String log) throws Exception {
+		
 			try {
 				JapeFactory.dao("AD_KPTLOGAPI").create()
 				.set("NUNOTA", nunota)
@@ -67,6 +70,9 @@ public class Updates {
 			} catch (Exception e) {
 				MGEModelException.throwMe(e);
 				e.printStackTrace();
-			}}
+			}finally {
+
+			}
+			}
 		
 }

@@ -188,6 +188,7 @@ public class Services {
 			response = call.execute();
 			if (response.isSuccessful() && response.body() != null) {
 				String respostaJson = response.body().string().trim();
+			    respostaJson = respostaJson.replace("\"", "");
 				iddev = Integer.parseInt(respostaJson);
 
 			} else {

@@ -46,7 +46,7 @@ public class Lancanotas implements ScheduledAction {
 			
 			
 			Collection<DynamicVO> nunotas = JapeFactory.dao(DynamicEntityNames.CABECALHO_NOTA)
-					.find(" CODTIPOPER IN (" + top + ")" + "AND NUNOTA = 208438");
+					.find(" CODTIPOPER IN (" + top + ")" + "AND AD_IDNOTA IS NULL AND TRUNC(DTNEG) = TRUNC(SYSDATE)");
 
 		for (DynamicVO nunota : nunotas) {
 //			DynamicVO parceiro = JapeFactory.dao(DynamicEntityNames.PARCEIRO).findByPK(nunota.asBigDecimalOrZero("CODPARC")); // ID DO PARCEIRO NO VEEVA
@@ -107,5 +107,3 @@ public class Lancanotas implements ScheduledAction {
 		
 
 	}
-
-
