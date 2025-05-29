@@ -108,7 +108,6 @@ public class Services {
 
 				Request request = new Request.Builder().url(url + "/V1/orders/create-complete").put(body)
 						.addHeader("Authorization", token)
-
 						.addHeader("Content-Type", "application/json").build();
 				Call call = client.newCall(request);
 				response = call.execute();
