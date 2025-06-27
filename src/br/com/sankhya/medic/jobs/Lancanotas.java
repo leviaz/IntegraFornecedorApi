@@ -95,7 +95,8 @@ public class Lancanotas implements ScheduledAction {
 						}
 					}
 					update.attPK("TGFCAB", "NUNOTA", nuNota, "AD_IDNOTA", idNota); // APÓS FAZER O UPDATE DOS ITENS FAÇA DA NUNOTA
-					update.log(nuNota, "Nota de venda lançada com sucesso IDNOTA:"+ idNota.toString());
+					update.log(nuNota, "Nota de venda lançada com sucesso IDNOTA:" + idNota.toString(),
+                            services.bodyAddPed, services.responseAddPed);
 				}
 			}
 			}

@@ -69,7 +69,7 @@ public class Cancelarnotas implements ScheduledAction {
 					Integer idDevNota = services.Devolveped(token, idnota, "Comment",nunotadev,nunotaorig);
 					if (idDevNota > 0) {
 						update.attPK("TGFCAB","NUNOTA", nunotadev, "AD_IDNOTADEV", idDevNota);
-						update.log(nunotadev, "Nota de devolução feito com sucesso:"+ idDevNota.toString());
+						update.log(nunotadev, "Nota de devolução feito com sucesso:"+ idDevNota.toString(),services.bodyAddPed, services.responseAddPed);
 					}
 					else {
 						//LANÇAR NA TELA DE LOG

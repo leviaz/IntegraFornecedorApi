@@ -60,19 +60,21 @@ public class Updates {
 		}
 	}
 	
-	public void log(BigDecimal nunota, String log) throws Exception {
-		
-			try {
-				JapeFactory.dao("AD_KPTLOGAPI").create()
-				.set("NUNOTA", nunota)
-				.set("LOG", log.toCharArray())
-				.set("DATA",TimeUtils.getNow()).save();
-			} catch (Exception e) {
-				MGEModelException.throwMe(e);
-				e.printStackTrace();
-			}finally {
+	public void log(BigDecimal nunota, String log, String body, String response) throws Exception {
+        try {
+            JapeFactory.dao("AD_KPTLOGAPI").create()
+            .set("NUNOTA", nunota)
+            .set("LOG", log.toCharArray())
+            .set("DATA",TimeUtils.getNow())
+            .set("BODY", body.toCharArray())
+            .set("RESPONSE", response.toCharArray())
+            .save();
+        } catch (Exception e) {
+            MGEModelException.throwMe(e);
+            e.printStackTrace();
+        }finally {
 
-			}
-			}
+        }
+        }
 		
 }

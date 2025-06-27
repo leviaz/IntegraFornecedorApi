@@ -29,6 +29,12 @@ import okhttp3.Response;
 public class Services {
 	Utilitarios util = new Utilitarios();
 	Updates upd = new Updates();
+	
+	public String bodyDevolvePed;      
+    public String responseDevolvePed;   
+
+    public String bodyAddPed;         
+    public String responseAddPed;       
 
 	// criando pedido
 	public int Addped(String token, BigDecimal codparc, BigDecimal nunota) throws Exception {
@@ -40,7 +46,7 @@ public class Services {
 			String url = util.consultaParam("KPT_URLAPIVEEVO");
 
 			OkHttpClient client = new OkHttpClient();
-			DynamicVO parc = JapeFactory.dao(DynamicEntityNames.PARCEIRO).findByPK(BigDecimal.valueOf(10003));
+			DynamicVO parc = JapeFactory.dao(DynamicEntityNames.PARCEIRO).findByPK(codparc);
 
 			DynamicVO cab = JapeFactory.dao(DynamicEntityNames.CABECALHO_NOTA).findByPK(nunota);
 
@@ -50,7 +56,7 @@ public class Services {
 			if ("0".equals(tipvenda)) {
 				// mudar para tsiavi
 				//throw new Exception("Método de pagamento não cadastrado");
-				upd.log(nunota, "Nota não pode ser enviada, pois o método de pagamento não foi cadastrado");
+				upd.log(nunota, "Nota não pode ser enviada, pois o método de pagamento não foi cadastrado", bodyAddPed, responseAddPed);
 			}
 			String metPag = util.consultaMetPag(cab.asBigDecimalOrZero("CODTIPVENDA"));
 			int idAdr = buscaCliente(token, codparc);
@@ -58,7 +64,7 @@ public class Services {
 			if (idAdr == 0) {
 				// mudar para tsiavi
 				//throw new Exception("Cliente não possui cadastro completo na API VEEVO");
-				upd.log(nunota, "Nota não pode ser enviada, pois o cliente não está cadastrado");
+				upd.log(nunota, "Nota não pode ser enviada, pois o cliente não está cadastrado",bodyAddPed, responseAddPed);
 			}
 
 			DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
@@ -102,30 +108,36 @@ public class Services {
 						+ "\"},\"invoiceData\":{\"distributor_invoice_number\":\""
 						+ cab.asBigDecimalOrZero("NUMNOTA").toString() + "\",\"distributor_cnpj\":\""
 						+ emp.asString("CGC") + "\",\"distributor_invoice_access_key\":\"" + cab.asString("CHAVENFE")
-						+ "\",\"distributor_invoice_series_code\":\"" + cab.asBigDecimal("NUMNOTA").toString()
+						+ "\",\"distributor_invoice_series_code\":\"" + "1"
 						+ "\",\"invoice_processed_at\":\"" + invProcessDt + "\"},\"coupons\":[]}";
 				RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), bodyRq);
+				
+				
+				this.bodyAddPed = bodyRq; // Captura o body usado
 
 				Request request = new Request.Builder().url(url + "/V1/orders/create-complete").put(body)
 						.addHeader("Authorization", token)
 						.addHeader("Content-Type", "application/json").build();
 				Call call = client.newCall(request);
 				response = call.execute();
+				
+				
 				if (response.isSuccessful() && response.body() != null) {
 					String respostaJson = response.body().string().trim();
+					this.responseAddPed = respostaJson;
 					idpdd = Integer.parseInt(respostaJson);
 					if (idpdd == 0) {
 						System.out.println("Erro: " + response.code());
 						// LANÇAR NA TELA DE LOG
-						upd.log(nunota, "Nota não gerou id de criação");
+						upd.log(nunota, "Nota não gerou id de criação",bodyAddPed, responseAddPed);
 						//throw new Exception("" + response.code() + response);
 					}
 
 				} else {
 					System.out.println("Request invalida com status: " + response.code() + response.body());
-					JSONObject root = new JSONObject(response.body().string());
+//					JSONObject root = new JSONObject(response.body().string());
 					// LANÇAR NA TELA DE LOG
-					upd.log(nunota, "Nota apresentou status inválido na criação");
+					upd.log(nunota, "Nota apresentou status inválido na criação", bodyAddPed, responseAddPed);
 					//throw new Error(root.getString("message"));
 				}
 				response.close();
@@ -188,19 +200,24 @@ public class Services {
 			RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), bodyRq);
 			Request request = new Request.Builder().url(url).post(body).addHeader("Authorization", token)
 					.addHeader("Content-Type", "application/json").build();
+			
+			this.bodyDevolvePed = bodyRq;
+			
 
 			Call call = client.newCall(request);
 			response = call.execute();
+			
 			if (response.isSuccessful() && response.body() != null) {
 				String respostaJson = response.body().string().trim();
 			    respostaJson = respostaJson.replace("\"", "");
+			    this.responseDevolvePed = respostaJson;
 				iddev = Integer.parseInt(respostaJson);
 
 			} else {
 				System.out.println("Request invalida com status: " + response.code());
-				JSONObject root = new JSONObject(response.body().string());
+//				JSONObject root = new JSONObject(response.body().string());
 				// LANÇAR NA TELA DE LOG
-				upd.log(nunotadev, "Nota apresentou status inválido na devolução");
+				upd.log(nunotadev, "Nota apresentou status inválido na devolução", bodyAddPed, responseAddPed);
 				//throw new Error(root.getString("message"));
 
 			}
@@ -213,8 +230,7 @@ public class Services {
 		return iddev;
 	}
 
-	// Com o cpf ou cnpj do cliente faz uma consulta na api verificando se ele tem
-	// id
+	// Com o cpf ou cnpj do cliente faz uma consulta na api verificando se ele tem id
 	public int buscaCliente(String token, BigDecimal codparc) throws Exception {
 		int id = 0;
 		JSONObject root = null;
